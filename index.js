@@ -7,8 +7,7 @@ const chromium = require('@sparticuz/chromium');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// IMPORTANT: Your secret key to prevent abuse of the API
-// You will set this as an Environment Variable in Railway
+// Your secret key to prevent abuse of the API (Set this in Render's Environment Variables)
 const API_SECRET_KEY = process.env.API_SECRET_KEY;
 
 // Middleware to protect your API
@@ -31,7 +30,6 @@ app.get('/generate-pdf', requireApiKey, async (req, res) => {
     try {
         console.log("Launching browser...");
         
-        // Launch Puppeteer with the serverless-friendly chromium package
         browser = await puppeteer.launch({
             args: chromium.args,
             defaultViewport: chromium.defaultViewport,
@@ -42,7 +40,7 @@ app.get('/generate-pdf', requireApiKey, async (req, res) => {
         const page = await browser.newPage();
         
         console.log(`Navigating to URL: ${urlToCapture}`);
-        await page.goto(urlToCapture, { waitUntil: 'networkidle2' }); // Wait for the page to be fully loaded
+        await page.goto(urlToCapture, { waitUntil: 'networkidle2' });
 
         console.log("Generating PDF...");
         const pdfBuffer = await page.pdf({
@@ -53,9 +51,8 @@ app.get('/generate-pdf', requireApiKey, async (req, res) => {
 
         console.log("PDF generated successfully. Sending response.");
         
-        // Set headers to tell the client this is a PDF file
         res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', 'attachment; filename="resume.pdf"'); // The filename can be overridden by the client
+        res.setHeader('Content-Disposition', 'attachment; filename="resume.pdf"');
         res.send(pdfBuffer);
 
     } catch (error) {
